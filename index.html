@@ -3,214 +3,488 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>INVERTED ARCADE</title>
+<title>BLACKVAULT // Secure Notes</title>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <style>
-*{box-sizing:border-box;cursor:none!important}
-html,body{
- margin:0;width:100%;min-height:100%;
- background:#07070b;color:#fff;
- font-family:Arial,sans-serif;
-}
-body{overflow:hidden}
+*{box-sizing:border-box}
 
-#app{
- width:100%;
- min-height:100vh;
- display:flex;
- flex-direction:column;
- align-items:center;
+:root{
+ --bg:#05070a;
+ --panel:#0b1016;
+ --panel2:#101720;
+ --line:#1d2a34;
+ --text:#e8f0f4;
+ --muted:#71818d;
+ --cyan:#36e6ff;
+ --green:#49f5a5;
+ --red:#ff526b;
+ --yellow:#ffd166;
 }
+
+html,body{
+ margin:0;
+ width:100%;
+ min-height:100%;
+ background:var(--bg);
+ color:var(--text);
+ font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+
+body{
+ min-height:100vh;
+ overflow-x:hidden;
+}
+
+button,input,textarea{
+ font:inherit;
+}
+
+button{
+ border:1px solid var(--line);
+ background:var(--panel2);
+ color:var(--text);
+ border-radius:8px;
+ padding:11px 15px;
+ cursor:pointer;
+ transition:.18s;
+}
+
+button:hover{
+ border-color:var(--cyan);
+ color:var(--cyan);
+}
+
+button.primary{
+ background:var(--cyan);
+ color:#001015;
+ border-color:var(--cyan);
+ font-weight:800;
+}
+
+button.danger{
+ border-color:#63232e;
+ color:#ff7183;
+}
+
+input,textarea{
+ width:100%;
+ background:#060a0e;
+ color:var(--text);
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:12px;
+ outline:none;
+}
+
+input:focus,textarea:focus{
+ border-color:var(--cyan);
+ box-shadow:0 0 0 2px rgba(54,230,255,.08);
+}
+
+textarea{
+ resize:none;
+}
+
+.hidden{
+ display:none!important;
+}
+
+/* BOOT */
+
+#boot{
+ position:fixed;
+ inset:0;
+ z-index:9999;
+ background:#020405;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+}
+
+.bootBox{
+ width:min(500px,90vw);
+}
+
+.bootLogo{
+ font-size:42px;
+ font-weight:900;
+ letter-spacing:8px;
+ margin-bottom:25px;
+}
+
+.bootLogo span{
+ color:var(--cyan);
+}
+
+.bootLine{
+ color:#5f737f;
+ margin:7px 0;
+ font-family:monospace;
+}
+
+.bootBar{
+ height:4px;
+ background:#172129;
+ margin-top:25px;
+ overflow:hidden;
+}
+
+.bootProgress{
+ width:0%;
+ height:100%;
+ background:var(--cyan);
+ transition:width .4s;
+}
+
+/* HEADER */
 
 header{
- width:100%;
- padding:22px 30px;
+ height:68px;
+ border-bottom:1px solid var(--line);
  display:flex;
- justify-content:space-between;
  align-items:center;
- border-bottom:1px solid #222;
- background:#0a0a10;
+ justify-content:space-between;
+ padding:0 24px;
+ background:rgba(5,7,10,.94);
+ position:sticky;
+ top:0;
+ z-index:50;
 }
 
-.logo{
- font-size:22px;
+.brand{
  font-weight:900;
  letter-spacing:4px;
 }
 
-.logo span{color:#00ffff}
-
-#score{
- color:#aaa;
- font-size:14px;
+.brand span{
+ color:var(--cyan);
 }
 
-nav{
+.status{
+ display:flex;
+ align-items:center;
+ gap:8px;
+ color:var(--muted);
+ font-size:12px;
+}
+
+.dot{
+ width:8px;
+ height:8px;
+ border-radius:50%;
+ background:var(--green);
+ box-shadow:0 0 10px var(--green);
+}
+
+/* AUTH */
+
+#auth{
+ min-height:calc(100vh - 68px);
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ padding:30px;
+}
+
+.authCard{
+ width:min(950px,96vw);
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ border:1px solid var(--line);
+ background:var(--panel);
+ border-radius:18px;
+ overflow:hidden;
+}
+
+.authInfo{
+ padding:45px;
+ border-right:1px solid var(--line);
+}
+
+.authInfo h1{
+ font-size:44px;
+ margin:0 0 12px;
+ letter-spacing:5px;
+}
+
+.authInfo h1 span{
+ color:var(--cyan);
+}
+
+.authInfo p{
+ color:var(--muted);
+ line-height:1.7;
+}
+
+.protocol{
+ margin-top:30px;
+ border-top:1px solid var(--line);
+ padding-top:20px;
+ font-family:monospace;
+ color:#82939e;
+ font-size:13px;
+ line-height:1.9;
+}
+
+.authPanel{
+ padding:35px;
+}
+
+.panelTitle{
+ font-size:12px;
+ letter-spacing:3px;
+ color:var(--cyan);
+ margin-bottom:18px;
+}
+
+.camera{
+ width:100%;
+ aspect-ratio:4/3;
+ background:#020405;
+ border:1px solid var(--line);
+ border-radius:12px;
+ overflow:hidden;
+ position:relative;
+}
+
+video{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ transform:scaleX(-1);
+}
+
+.scan{
+ position:absolute;
+ inset:12%;
+ border:1px solid rgba(54,230,255,.45);
+ pointer-events:none;
+}
+
+.scan::before{
+ content:"";
+ position:absolute;
+ left:0;
+ right:0;
+ top:20%;
+ height:1px;
+ background:var(--cyan);
+ box-shadow:0 0 15px var(--cyan);
+ animation:scan 2s linear infinite;
+}
+
+@keyframes scan{
+ 0%{top:10%}
+ 100%{top:90%}
+}
+
+.authActions{
  display:flex;
  gap:10px;
- flex-wrap:wrap;
- justify-content:center;
+ margin-top:15px;
+}
+
+.message{
+ min-height:22px;
+ margin-top:14px;
+ color:var(--muted);
+ font-size:13px;
+}
+
+.message.good{color:var(--green)}
+.message.bad{color:var(--red)}
+
+/* VAULT */
+
+#vault{
+ min-height:calc(100vh - 68px);
+ display:grid;
+ grid-template-columns:250px 1fr;
+}
+
+.sidebar{
+ border-right:1px solid var(--line);
+ background:#070b0f;
  padding:20px;
 }
 
-button{
- border:1px solid #333;
- background:#101018;
- color:white;
- padding:11px 17px;
+.sideLabel{
+ font-size:10px;
+ letter-spacing:3px;
+ color:#566670;
+ margin:10px 0;
+}
+
+.noteList{
+ margin-top:10px;
+}
+
+.noteItem{
+ padding:12px;
+ border:1px solid transparent;
  border-radius:8px;
- font-weight:bold;
- transition:.2s;
+ margin-bottom:5px;
+ cursor:pointer;
 }
 
-button:hover{
- background:#181824;
- border-color:#00ffff;
- color:#00ffff;
+.noteItem:hover{
+ background:var(--panel2);
+ border-color:var(--line);
 }
 
-button.active{
- background:#00ffff;
- color:#050509;
- border-color:#00ffff;
+.noteItem.active{
+ background:#0e1a21;
+ border-color:#21414c;
 }
 
-#gameArea{
- width:min(900px,94vw);
- height:min(600px,68vh);
- min-height:400px;
- position:relative;
- border:1px solid #292934;
- border-radius:16px;
- background:#0b0b12;
+.noteItemTitle{
+ font-weight:700;
+ font-size:13px;
+ white-space:nowrap;
  overflow:hidden;
- box-shadow:0 0 60px rgba(0,255,255,.04);
+ text-overflow:ellipsis;
 }
 
-.screen{
- position:absolute;
- inset:0;
- display:none;
+.noteItemDate{
+ font-size:10px;
+ color:var(--muted);
+ margin-top:5px;
 }
 
-.screen.active{display:block}
+.main{
+ padding:25px;
+ min-width:0;
+}
 
-.center{
- position:absolute;
- inset:0;
+.vaultTop{
  display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:15px;
+ margin-bottom:20px;
+}
+
+.vaultTitle{
+ font-size:12px;
+ letter-spacing:3px;
+ color:var(--cyan);
+}
+
+.actions{
+ display:flex;
+ gap:8px;
+}
+
+.editor{
+ max-width:950px;
+}
+
+.titleInput{
+ font-size:28px;
+ font-weight:800;
+ border:none;
+ border-bottom:1px solid var(--line);
+ border-radius:0;
+ padding:12px 0;
+ background:transparent;
+}
+
+.noteBody{
+ min-height:55vh;
+ margin-top:15px;
+ line-height:1.7;
+ font-size:16px;
+ background:transparent;
+ border:none;
+}
+
+.meta{
+ display:flex;
+ justify-content:space-between;
+ color:#4f606a;
+ font-size:11px;
+ margin-top:10px;
+}
+
+.lockScreen{
+ position:fixed;
+ inset:0;
+ z-index:1000;
+ background:#020405;
+ display:none;
  align-items:center;
  justify-content:center;
- flex-direction:column;
- gap:12px;
-}
-
-.title{
- font-size:clamp(30px,6vw,65px);
- font-weight:900;
- letter-spacing:8px;
-}
-
-.subtitle{
- color:#888;
- letter-spacing:2px;
-}
-
-#aimTarget{
- position:absolute;
- width:45px;
- height:45px;
- border:3px solid #00ffff;
- border-radius:50%;
- box-shadow:0 0 20px #00ffff;
- display:none;
-}
-
-#aimTarget::after{
- content:"";
- position:absolute;
- width:7px;
- height:7px;
- background:#fff;
- border-radius:50%;
- left:50%;
- top:50%;
- transform:translate(-50%,-50%);
-}
-
-#aimInfo{
- position:absolute;
- top:15px;
- left:15px;
- color:#aaa;
-}
-
-#dodgeCanvas,#snakeCanvas,#breakoutCanvas{
- width:100%;
- height:100%;
- display:block;
-}
-
-.help{
- position:absolute;
- bottom:15px;
- left:50%;
- transform:translateX(-50%);
- color:#666;
- font-size:12px;
  text-align:center;
- white-space:nowrap;
 }
 
-#cursor{
- position:fixed;
- width:24px;
- height:24px;
- border:2px solid white;
- border-radius:50%;
- transform:translate(-50%,-50%);
- pointer-events:none;
- z-index:999999;
- mix-blend-mode:difference;
+.lockScreen.show{
+ display:flex;
 }
 
-#cursor:after{
- content:"";
- position:absolute;
- width:5px;height:5px;
- background:white;
- border-radius:50%;
- left:50%;top:50%;
- transform:translate(-50%,-50%);
+.lockInner{
+ width:min(500px,90vw);
 }
 
-#cursor.active{
- width:42px;
- height:42px;
- border-color:#00ffff;
+.lockIcon{
+ font-size:60px;
+ margin-bottom:15px;
 }
 
-#message{
- position:fixed;
- top:50%;
- left:50%;
- transform:translate(-50%,-50%);
- background:#101018;
- border:1px solid #00ffff;
- padding:25px 35px;
- border-radius:14px;
- display:none;
- z-index:10000;
- text-align:center;
- box-shadow:0 0 40px rgba(0,255,255,.15);
+.lockInner h1{
+ letter-spacing:5px;
+ color:var(--red);
 }
 
-@media(max-width:600px){
- header{padding:16px}
- nav{padding:12px}
- #gameArea{
-  height:65vh;
-  min-height:350px;
+.lockInner p{
+ color:var(--muted);
+ line-height:1.6;
+}
+
+.securityNote{
+ margin-top:20px;
+ padding:12px;
+ border:1px solid #263039;
+ color:#697984;
+ font-size:11px;
+}
+
+@media(max-width:800px){
+ .authCard{
+  grid-template-columns:1fr;
+ }
+
+ .authInfo{
+  border-right:0;
+  border-bottom:1px solid var(--line);
+ }
+
+ #vault{
+  grid-template-columns:1fr;
+ }
+
+ .sidebar{
+  border-right:0;
+  border-bottom:1px solid var(--line);
+ }
+
+ .noteList{
+  display:flex;
+  gap:5px;
+  overflow-x:auto;
+ }
+
+ .noteItem{
+  min-width:150px;
+ }
+
+ .authInfo{
+  padding:28px;
+ }
+
+ .authPanel{
+  padding:25px;
  }
 }
 </style>
@@ -218,722 +492,793 @@ button.active{
 
 <body>
 
-<div id="app">
-
-<header>
- <div class="logo">INVERTED<span> ARCADE</span></div>
- <div id="score">SCORE: 0</div>
-</header>
-
-<nav>
- <button class="gameBtn active" data-game="home">HOME</button>
- <button class="gameBtn" data-game="aim">AIM TRAINER</button>
- <button class="gameBtn" data-game="dodge">DODGE</button>
- <button class="gameBtn" data-game="snake">SNAKE</button>
- <button class="gameBtn" data-game="breakout">BREAKOUT</button>
-</nav>
-
-<div id="gameArea">
-
-<!-- HOME -->
-<div id="home" class="screen active">
- <div class="center">
-  <div class="title">ARCADE</div>
-  <div class="subtitle">WELCOME TO THE WRONG SIDE OF THE MOUSE</div>
-  <p style="color:#666">Choose a game above.</p>
+<!-- BOOT -->
+<div id="boot">
+ <div class="bootBox">
+  <div class="bootLogo">BLACK<span>VAULT</span></div>
+  <div class="bootLine" id="bootText">INITIALIZING SECURE ENVIRONMENT...</div>
+  <div class="bootBar">
+   <div class="bootProgress" id="bootProgress"></div>
+  </div>
  </div>
 </div>
 
-<!-- AIM -->
-<div id="aim" class="screen">
- <div id="aimInfo">TARGETS: <b id="aimScore">0</b> | TIME: <b id="aimTime">30</b></div>
- <div id="aimTarget"></div>
- <div class="help">CLICK THE TARGET • 30 SECONDS</div>
+<header>
+ <div class="brand">BLACK<span>VAULT</span></div>
+ <div class="status">
+  <span class="dot"></span>
+  LOCAL SECURE MODE
+ </div>
+</header>
+
+<!-- AUTHENTICATION -->
+<section id="auth">
+
+ <div class="authCard">
+
+  <div class="authInfo">
+
+   <h1>BLACK<span>VAULT</span></h1>
+
+   <p>
+    A private local notebook protected by camera-based
+    face verification.
+   </p>
+
+   <div class="protocol">
+    [01] CAMERA VERIFICATION<br>
+    [02] LOCAL FACE DESCRIPTOR<br>
+    [03] VAULT UNLOCK<br>
+    [04] NOTES STORED LOCALLY<br>
+    [05] FAILED VERIFICATION = LOCKOUT
+   </div>
+
+  </div>
+
+  <div class="authPanel">
+
+   <div class="panelTitle" id="authTitle">
+    INITIALIZE IDENTITY
+   </div>
+
+   <div class="camera">
+    <video id="video" autoplay muted playsinline></video>
+    <div class="scan"></div>
+   </div>
+
+   <div class="authActions">
+    <button id="cameraBtn" class="primary">
+     ENABLE CAMERA
+    </button>
+
+    <button id="actionBtn" class="hidden">
+     ENROLL FACE
+    </button>
+   </div>
+
+   <div id="authMessage" class="message">
+    Camera access is required.
+   </div>
+
+  </div>
+
+ </div>
+
+</section>
+
+<!-- VAULT -->
+<section id="vault" class="hidden">
+
+ <aside class="sidebar">
+
+  <button id="newNote" class="primary" style="width:100%">
+   + NEW NOTE
+  </button>
+
+  <div class="sideLabel">CLASSIFIED FILES</div>
+
+  <div id="noteList" class="noteList"></div>
+
+  <div style="margin-top:25px">
+   <button id="lockBtn" class="danger" style="width:100%">
+    LOCK VAULT
+   </button>
+  </div>
+
+ </aside>
+
+ <main class="main">
+
+  <div class="vaultTop">
+
+   <div class="vaultTitle">
+    SECURE NOTE EDITOR
+   </div>
+
+   <div class="actions">
+    <button id="saveBtn">SAVE</button>
+    <button id="deleteBtn" class="danger">DELETE</button>
+   </div>
+
+  </div>
+
+  <div class="editor">
+
+   <input
+    id="noteTitle"
+    class="titleInput"
+    placeholder="Untitled file"
+   >
+
+   <textarea
+    id="noteBody"
+    class="noteBody"
+    placeholder="Write your classified notes..."
+   ></textarea>
+
+   <div class="meta">
+    <span id="noteStatus">READY</span>
+    <span>LOCAL STORAGE</span>
+   </div>
+
+  </div>
+
+ </main>
+
+</section>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen" class="lockScreen">
+
+ <div class="lockInner">
+
+  <div class="lockIcon">⛔</div>
+
+  <h1>ACCESS DENIED</h1>
+
+  <p>
+   Face verification failed.<br>
+   The vault has been locked and its contents have been removed
+   from the visible interface.
+  </p>
+
+  <div class="securityNote">
+   For real-world sensitive information, use a dedicated password
+   manager or encrypted application. This GitHub Pages project
+   is a demonstration of client-side authentication.
+  </div>
+
+  <button id="returnBtn" class="primary" style="margin-top:20px">
+   RETURN TO AUTHENTICATION
+  </button>
+
+ </div>
+
 </div>
 
-<!-- DODGE -->
-<div id="dodge" class="screen">
- <canvas id="dodgeCanvas"></canvas>
- <div class="help">MOVE WITH WASD / ARROW KEYS • SURVIVE</div>
-</div>
-
-<!-- SNAKE -->
-<div id="snake" class="screen">
- <canvas id="snakeCanvas"></canvas>
- <div class="help">ARROW KEYS / WASD • EAT THE DOT</div>
-</div>
-
-<!-- BREAKOUT -->
-<div id="breakout" class="screen">
- <canvas id="breakoutCanvas"></canvas>
- <div class="help">MOVE MOUSE OR ARROWS • BREAK EVERYTHING</div>
-</div>
-
-</div>
-</div>
-
-<div id="cursor"></div>
-
-<div id="message">
- <h2 id="messageTitle">GAME OVER</h2>
- <p id="messageText"></p>
- <button id="restart">RESTART</button>
-</div>
 
 <script>
 
-/* =========================
-   INVERTED CURSOR
-========================= */
+/* =========================================
+   BLACKVAULT
+   Single-file local face-authenticated notes
+========================================= */
 
-const cursor=document.getElementById("cursor");
+const MODEL_URL =
+ "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights";
 
-let realX=innerWidth/2;
-let realY=innerHeight/2;
-let fakeX=realX;
-let fakeY=realY;
-let firstMove=true;
+const STORAGE_FACE = "blackvault_face_descriptor";
+const STORAGE_NOTES = "blackvault_notes";
 
-document.addEventListener("mousemove",e=>{
+let stream = null;
+let enrolledDescriptor = null;
+let currentNoteId = null;
+let modelsReady = false;
 
- if(firstMove){
-  realX=e.clientX;
-  realY=e.clientY;
-  fakeX=realX;
-  fakeY=realY;
-  firstMove=false;
+
+/* =========================================
+   DOM
+========================================= */
+
+const boot = document.getElementById("boot");
+const bootText = document.getElementById("bootText");
+const bootProgress = document.getElementById("bootProgress");
+
+const auth = document.getElementById("auth");
+const vault = document.getElementById("vault");
+
+const video = document.getElementById("video");
+const cameraBtn = document.getElementById("cameraBtn");
+const actionBtn = document.getElementById("actionBtn");
+const authMessage = document.getElementById("authMessage");
+const authTitle = document.getElementById("authTitle");
+
+const noteList = document.getElementById("noteList");
+const noteTitle = document.getElementById("noteTitle");
+const noteBody = document.getElementById("noteBody");
+const noteStatus = document.getElementById("noteStatus");
+
+const lockScreen = document.getElementById("lockScreen");
+
+
+/* =========================================
+   BOOT
+========================================= */
+
+async function bootSystem(){
+
+ const steps=[
+  ["LOADING FACE ENGINE...",20],
+  ["LOADING DETECTOR...",45],
+  ["LOADING LANDMARK MODEL...",70],
+  ["LOADING RECOGNITION MODEL...",90],
+  ["SECURE ENVIRONMENT READY",100]
+ ];
+
+ try{
+
+  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+  bootText.textContent=steps[1][0];
+  bootProgress.style.width=steps[1][1]+"%";
+
+  await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
+  bootText.textContent=steps[2][0];
+  bootProgress.style.width=steps[2][1]+"%";
+
+  await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+  bootText.textContent=steps[4][0];
+  bootProgress.style.width="100%";
+
+  modelsReady=true;
+
+ }catch(error){
+
+  console.error(error);
+
+  bootText.textContent=
+   "MODEL LOAD FAILED — CHECK INTERNET CONNECTION";
+
+  bootProgress.style.width="100%";
+
+  setTimeout(()=>{
+   boot.style.display="none";
+  },1800);
+
+  return;
  }
 
- const dx=e.clientX-realX;
- const dy=e.clientY-realY;
+ setTimeout(()=>{
+  boot.style.display="none";
+ },500);
 
- realX=e.clientX;
- realY=e.clientY;
+ const saved=localStorage.getItem(STORAGE_FACE);
 
- fakeX-=dx;
- fakeY-=dy;
+ if(saved){
 
- fakeX=Math.max(0,Math.min(innerWidth,fakeX));
- fakeY=Math.max(0,Math.min(innerHeight,fakeY));
-
- cursor.style.left=fakeX+"px";
- cursor.style.top=fakeY+"px";
-
- if(currentGame==="breakout") breakoutMouse=e.clientX;
-});
-
-document.addEventListener("mousedown",()=>{
- cursor.classList.add("active");
-});
-
-document.addEventListener("mouseup",()=>{
- cursor.classList.remove("active");
-});
-
-
-/* =========================
-   GAME SYSTEM
-========================= */
-
-let currentGame="home";
-let animation=null;
-
-const scoreDisplay=document.getElementById("score");
-
-function setScore(n){
- scoreDisplay.textContent="SCORE: "+n;
-}
-
-function stopGame(){
- if(animation){
-  cancelAnimationFrame(animation);
-  animation=null;
- }
-
- clearInterval(aimTimer);
- clearInterval(snakeTimer);
-
- document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
-}
-
-document.querySelectorAll(".gameBtn").forEach(btn=>{
-
- btn.addEventListener("click",()=>{
-
-  stopGame();
-
-  document.querySelectorAll(".gameBtn")
-   .forEach(b=>b.classList.remove("active"));
-
-  btn.classList.add("active");
-
-  currentGame=btn.dataset.game;
-
-  document.getElementById(currentGame).classList.add("active");
-
-  setScore(0);
-
-  if(currentGame==="aim") startAim();
-  if(currentGame==="dodge") startDodge();
-  if(currentGame==="snake") startSnake();
-  if(currentGame==="breakout") startBreakout();
-
- });
-
-});
-
-
-/* =========================
-   MESSAGE
-========================= */
-
-const message=document.getElementById("message");
-const messageTitle=document.getElementById("messageTitle");
-const messageText=document.getElementById("messageText");
-
-function gameOver(title,text){
-
- messageTitle.textContent=title;
- messageText.textContent=text;
- message.style.display="block";
-}
-
-document.getElementById("restart").onclick=()=>{
-
- message.style.display="none";
-
- document.querySelector(`[data-game="${currentGame}"]`).click();
-
-};
-
-
-/* =========================
-   AIM TRAINER
-========================= */
-
-const target=document.getElementById("aimTarget");
-const aimScoreEl=document.getElementById("aimScore");
-const aimTimeEl=document.getElementById("aimTime");
-
-let aimScore=0;
-let aimTime=30;
-let aimTimer=null;
-
-function moveTarget(){
-
- const area=document.getElementById("aim");
-
- const x=Math.random()*(area.clientWidth-60)+30;
- const y=Math.random()*(area.clientHeight-80)+40;
-
- target.style.left=x+"px";
- target.style.top=y+"px";
- target.style.display="block";
-}
-
-function startAim(){
-
- aimScore=0;
- aimTime=30;
-
- aimScoreEl.textContent=0;
- aimTimeEl.textContent=30;
-
- moveTarget();
-
- clearInterval(aimTimer);
-
- aimTimer=setInterval(()=>{
-
-  aimTime--;
-
-  aimTimeEl.textContent=aimTime;
-
-  if(aimTime<=0){
-
-   clearInterval(aimTimer);
-   target.style.display="none";
-
-   setScore(aimScore);
-
-   gameOver(
-    "TIME!",
-    "You hit "+aimScore+" targets."
-   );
+  try{
+   enrolledDescriptor=new Float32Array(JSON.parse(saved));
+   authTitle.textContent="IDENTITY VERIFICATION";
+   actionBtn.textContent="VERIFY FACE";
+   actionBtn.classList.remove("hidden");
+  }catch{
+   localStorage.removeItem(STORAGE_FACE);
+   setupEnrollment();
   }
 
- },1000);
+ }else{
+  setupEnrollment();
+ }
+
 }
 
-target.addEventListener("click",e=>{
 
- if(currentGame!=="aim")return;
+/* =========================================
+   CAMERA
+========================================= */
 
- e.stopPropagation();
+cameraBtn.addEventListener("click",async()=>{
 
- aimScore++;
+ if(stream){
 
- aimScoreEl.textContent=aimScore;
- setScore(aimScore);
+  stopCamera();
+  cameraBtn.textContent="ENABLE CAMERA";
+  actionBtn.classList.add("hidden");
+  return;
+ }
 
- moveTarget();
+ try{
+
+  stream=await navigator.mediaDevices.getUserMedia({
+   video:{
+    facingMode:"user",
+    width:{ideal:640},
+    height:{ideal:480}
+   },
+   audio:false
+  });
+
+  video.srcObject=stream;
+
+  cameraBtn.textContent="STOP CAMERA";
+
+  actionBtn.classList.remove("hidden");
+
+  authMessage.textContent=
+   "Camera online. Position your face inside the frame.";
+
+ }catch(error){
+
+  authMessage.className="message bad";
+
+  authMessage.textContent=
+   "Camera permission was denied or unavailable.";
+
+ }
 
 });
 
 
-/* =========================
-   DODGE
-========================= */
+function stopCamera(){
 
-const dodgeCanvas=document.getElementById("dodgeCanvas");
-const dc=dodgeCanvas.getContext("2d");
+ if(stream){
 
-let dodgePlayer;
-let enemies=[];
-let keys={};
-let dodgeStart;
-let dodgeScore;
+  stream.getTracks().forEach(track=>track.stop());
+  stream=null;
+ }
 
-function resizeCanvas(canvas,ctx){
-
- const rect=canvas.parentElement.getBoundingClientRect();
-
- canvas.width=rect.width;
- canvas.height=rect.height;
-}
-
-document.addEventListener("keydown",e=>{
- keys[e.key.toLowerCase()]=true;
-});
-
-document.addEventListener("keyup",e=>{
- keys[e.key.toLowerCase()]=false;
-});
-
-function startDodge(){
-
- resizeCanvas(dodgeCanvas,dc);
-
- dodgePlayer={
-  x:dodgeCanvas.width/2,
-  y:dodgeCanvas.height/2,
-  size:18,
-  speed:5
- };
-
- enemies=[];
- dodgeScore=0;
- dodgeStart=Date.now();
-
- for(let i=0;i<8;i++) spawnEnemy();
-
- dodgeLoop();
-}
-
-function spawnEnemy(){
-
- enemies.push({
-  x:Math.random()*dodgeCanvas.width,
-  y:-30,
-  size:12+Math.random()*12,
-  speed:2+Math.random()*3
- });
+ video.srcObject=null;
 
 }
 
-function dodgeLoop(){
 
- dc.clearRect(0,0,dodgeCanvas.width,dodgeCanvas.height);
+/* =========================================
+   ENROLLMENT
+========================================= */
 
- let p=dodgePlayer;
+function setupEnrollment(){
 
- if(keys["w"]||keys["arrowup"])p.y-=p.speed;
- if(keys["s"]||keys["arrowdown"])p.y+=p.speed;
- if(keys["a"]||keys["arrowleft"])p.x-=p.speed;
- if(keys["d"]||keys["arrowright"])p.x+=p.speed;
+ enrolledDescriptor=null;
 
- p.x=Math.max(p.size,Math.min(dodgeCanvas.width-p.size,p.x));
- p.y=Math.max(p.size,Math.min(dodgeCanvas.height-p.size,p.y));
+ authTitle.textContent="INITIALIZE IDENTITY";
 
- dc.beginPath();
- dc.arc(p.x,p.y,p.size,0,Math.PI*2);
- dc.strokeStyle="#00ffff";
- dc.lineWidth=3;
- dc.stroke();
+ actionBtn.textContent="ENROLL FACE";
 
- for(let i=enemies.length-1;i>=0;i--){
+ actionBtn.classList.remove("hidden");
 
-  let e=enemies[i];
+ authMessage.className="message";
 
-  e.y+=e.speed;
+ authMessage.textContent=
+  "First visit: capture your face to create a local identity.";
 
-  dc.beginPath();
-  dc.arc(e.x,e.y,e.size,0,Math.PI*2);
-  dc.fillStyle="#ff3b6b";
-  dc.fill();
+}
 
-  const dx=e.x-p.x;
-  const dy=e.y-p.y;
+async function getFaceDescriptor(){
 
-  if(Math.hypot(dx,dy)<e.size+p.size){
+ if(!modelsReady){
 
-   gameOver(
-    "YOU GOT HIT",
-    "Survival: "+dodgeScore+" points"
-   );
+  throw new Error("Models are not ready.");
 
+ }
+
+ if(!video.videoWidth){
+
+  throw new Error("Camera is not ready.");
+
+ }
+
+ const result=await faceapi
+  .detectSingleFace(
+   video,
+   new faceapi.TinyFaceDetectorOptions({
+    inputSize:320,
+    scoreThreshold:.55
+   })
+  )
+  .withFaceLandmarks(true)
+  .withFaceDescriptor();
+
+ return result;
+}
+
+
+/* =========================================
+   AUTH BUTTON
+========================================= */
+
+actionBtn.addEventListener("click",async()=>{
+
+ if(!stream){
+
+  authMessage.className="message bad";
+  authMessage.textContent="Enable the camera first.";
+  return;
+ }
+
+ actionBtn.disabled=true;
+
+ try{
+
+  authMessage.className="message";
+  authMessage.textContent="Scanning face...";
+
+  const result=await getFaceDescriptor();
+
+  if(!result){
+
+   authMessage.className="message bad";
+   authMessage.textContent=
+    "No clear face detected. Look directly at the camera.";
    return;
   }
 
-  if(e.y>dodgeCanvas.height+50){
+  if(!enrolledDescriptor){
 
-   enemies.splice(i,1);
-   spawnEnemy();
-   dodgeScore++;
-   setScore(dodgeScore);
+   enrolledDescriptor=result.descriptor;
+
+   localStorage.setItem(
+    STORAGE_FACE,
+    JSON.stringify(Array.from(enrolledDescriptor))
+   );
+
+   authMessage.className="message good";
+   authMessage.textContent=
+    "Identity enrolled locally. Unlocking vault...";
+
+   setTimeout(unlockVault,700);
+
+  }else{
+
+   const distance=faceapi.euclideanDistance(
+    enrolledDescriptor,
+    result.descriptor
+   );
+
+   console.log("Face distance:",distance);
+
+   /*
+     Lower = more similar.
+     0.48 is intentionally fairly strict.
+   */
+
+   if(distance<0.48){
+
+    authMessage.className="message good";
+    authMessage.textContent=
+     "Identity verified.";
+
+    setTimeout(unlockVault,500);
+
+   }else{
+
+    await denyAccess();
+
+   }
+
   }
+
+ }catch(error){
+
+  console.error(error);
+
+  authMessage.className="message bad";
+  authMessage.textContent=
+   "Verification error. Try again with better lighting.";
+
+ }finally{
+
+  actionBtn.disabled=false;
+
  }
-
- if(Date.now()-dodgeStart>30000){
-
-  gameOver("30 SECONDS!", "You survived.");
-  return;
- }
-
- animation=requestAnimationFrame(dodgeLoop);
-}
-
-
-/* =========================
-   SNAKE
-========================= */
-
-const snakeCanvas=document.getElementById("snakeCanvas");
-const sc=snakeCanvas.getContext("2d");
-
-let snake=[];
-let food={};
-let snakeDir={x:1,y:0};
-let snakeTimer=null;
-let snakeScore=0;
-
-function startSnake(){
-
- resizeCanvas(snakeCanvas,sc);
-
- const size=20;
-
- snake=[
-  {x:8,y:8},
-  {x:7,y:8},
-  {x:6,y:8}
- ];
-
- snakeDir={x:1,y:0};
- snakeScore=0;
-
- spawnFood();
-
- clearInterval(snakeTimer);
- snakeTimer=setInterval(snakeStep,110);
-
- drawSnake();
-}
-
-document.addEventListener("keydown",e=>{
-
- if(currentGame!=="snake")return;
-
- const k=e.key.toLowerCase();
-
- if((k==="arrowup"||k==="w")&&snakeDir.y!==1)
-  snakeDir={x:0,y:-1};
-
- if((k==="arrowdown"||k==="s")&&snakeDir.y!==-1)
-  snakeDir={x:0,y:1};
-
- if((k==="arrowleft"||k==="a")&&snakeDir.x!==1)
-  snakeDir={x:-1,y:0};
-
- if((k==="arrowright"||k==="d")&&snakeDir.x!==-1)
-  snakeDir={x:1,y:0};
 
 });
 
-function spawnFood(){
 
- const cols=Math.floor(snakeCanvas.width/20);
- const rows=Math.floor(snakeCanvas.height/20);
+/* =========================================
+   VAULT
+========================================= */
 
- food={
-  x:Math.floor(Math.random()*cols),
-  y:Math.floor(Math.random()*rows)
- };
+function unlockVault(){
+
+ stopCamera();
+
+ auth.classList.add("hidden");
+ vault.classList.remove("hidden");
+
+ renderNotes();
+
+ const notes=getNotes();
+
+ if(notes.length){
+  openNote(notes[0].id);
+ }else{
+  createNote();
+ }
 
 }
 
-function snakeStep(){
+function lockVault(){
 
- const cols=Math.floor(snakeCanvas.width/20);
- const rows=Math.floor(snakeCanvas.height/20);
+ stopCamera();
 
- const head={
-  x:snake[0].x+snakeDir.x,
-  y:snake[0].y+snakeDir.y
- };
+ noteTitle.value="";
+ noteBody.value="";
+ currentNoteId=null;
 
- if(
-  head.x<0||
-  head.y<0||
-  head.x>=cols||
-  head.y>=rows||
-  snake.some(s=>s.x===head.x&&s.y===head.y)
- ){
+ vault.classList.add("hidden");
+ auth.classList.remove("hidden");
 
-  clearInterval(snakeTimer);
+ lockScreen.classList.remove("show");
 
-  gameOver("SNAKE OVER","Score: "+snakeScore);
-  return;
- }
+ if(enrolledDescriptor){
 
- snake.unshift(head);
-
- if(head.x===food.x&&head.y===food.y){
-
-  snakeScore++;
-  setScore(snakeScore);
-  spawnFood();
+  authTitle.textContent="IDENTITY VERIFICATION";
+  actionBtn.textContent="VERIFY FACE";
+  actionBtn.classList.remove("hidden");
 
  }else{
+  setupEnrollment();
+ }
 
-  snake.pop();
+}
+
+
+/* =========================================
+   FAILED AUTH
+========================================= */
+
+async function denyAccess(){
+
+ stopCamera();
+
+ auth.classList.add("hidden");
+
+ lockScreen.classList.add("show");
+
+ // Clear the editor from memory/UI.
+ noteTitle.value="";
+ noteBody.value="";
+
+ currentNoteId=null;
+
+ // Small delay makes the lockout feel deliberate.
+ await new Promise(resolve=>setTimeout(resolve,1000));
+
+}
+
+
+/* =========================================
+   NOTES
+========================================= */
+
+function getNotes(){
+
+ try{
+
+  return JSON.parse(
+   localStorage.getItem(STORAGE_NOTES)||"[]"
+  );
+
+ }catch{
+
+  return [];
 
  }
 
- drawSnake();
 }
 
-function drawSnake(){
+function saveNotes(notes){
 
- sc.clearRect(0,0,snakeCanvas.width,snakeCanvas.height);
-
- snake.forEach((s,i)=>{
-
-  sc.fillStyle=i===0?"#00ffff":"#148c91";
-
-  sc.fillRect(
-   s.x*20+2,
-   s.y*20+2,
-   16,
-   16
-  );
-
- });
-
- sc.fillStyle="#fff";
-
- sc.fillRect(
-  food.x*20+5,
-  food.y*20+5,
-  10,
-  10
+ localStorage.setItem(
+  STORAGE_NOTES,
+  JSON.stringify(notes)
  );
 
 }
 
+function createNote(){
 
-/* =========================
-   BREAKOUT
-========================= */
+ const notes=getNotes();
 
-const breakoutCanvas=document.getElementById("breakoutCanvas");
-const bc=breakoutCanvas.getContext("2d");
-
-let breakoutBall;
-let breakoutPaddle;
-let bricks=[];
-let breakoutMouse=0;
-
-function startBreakout(){
-
- resizeCanvas(breakoutCanvas,bc);
-
- breakoutPaddle={
-  x:breakoutCanvas.width/2-55,
-  y:breakoutCanvas.height-35,
-  w:110,
-  h:12
+ const note={
+  id:crypto.randomUUID(),
+  title:"Untitled file",
+  body:"",
+  updated:Date.now()
  };
 
- breakoutBall={
-  x:breakoutCanvas.width/2,
-  y:breakoutCanvas.height/2,
-  dx:4,
-  dy:-4,
-  r:8
- };
+ notes.unshift(note);
 
- bricks=[];
+ saveNotes(notes);
 
- const cols=8;
- const rows=5;
- const gap=8;
+ renderNotes();
+ openNote(note.id);
 
- const bw=(breakoutCanvas.width-70-gap*(cols-1))/cols;
-
- for(let r=0;r<rows;r++){
-
-  for(let c=0;c<cols;c++){
-
-   bricks.push({
-    x:35+c*(bw+gap),
-    y:35+r*30,
-    w:bw,
-    h:20,
-    alive:true
-   });
-
-  }
- }
-
- breakoutLoop();
 }
 
-document.addEventListener("keydown",e=>{
+function openNote(id){
 
- if(currentGame!=="breakout")return;
+ const notes=getNotes();
+ const note=notes.find(n=>n.id===id);
 
- if(e.key==="ArrowLeft")
-  breakoutPaddle.x-=25;
+ if(!note)return;
 
- if(e.key==="ArrowRight")
-  breakoutPaddle.x+=25;
+ currentNoteId=id;
 
-});
+ noteTitle.value=note.title;
+ noteBody.value=note.body;
 
-function breakoutLoop(){
+ noteStatus.textContent=
+  "LAST EDITED "+new Date(note.updated).toLocaleString();
 
- bc.clearRect(0,0,breakoutCanvas.width,breakoutCanvas.height);
+ renderNotes();
 
- const b=breakoutBall;
- const p=breakoutPaddle;
+}
 
- if(breakoutMouse){
-  p.x=breakoutMouse-
-   breakoutCanvas.getBoundingClientRect().left-
-   p.w/2;
+function saveCurrentNote(){
+
+ if(!currentNoteId)return;
+
+ const notes=getNotes();
+
+ const note=notes.find(n=>n.id===currentNoteId);
+
+ if(!note)return;
+
+ note.title=
+  noteTitle.value.trim()||"Untitled file";
+
+ note.body=noteBody.value;
+
+ note.updated=Date.now();
+
+ saveNotes(notes);
+
+ noteStatus.textContent="SAVED JUST NOW";
+
+ renderNotes();
+
+}
+
+function deleteCurrentNote(){
+
+ if(!currentNoteId)return;
+
+ const notes=getNotes()
+  .filter(n=>n.id!==currentNoteId);
+
+ saveNotes(notes);
+
+ currentNoteId=null;
+
+ noteTitle.value="";
+ noteBody.value="";
+
+ renderNotes();
+
+ if(notes.length){
+  openNote(notes[0].id);
+ }else{
+  createNote();
  }
 
- p.x=Math.max(0,Math.min(
-  breakoutCanvas.width-p.w,
-  p.x
- ));
+}
 
- b.x+=b.dx;
- b.y+=b.dy;
+function renderNotes(){
 
- if(b.x-b.r<0||b.x+b.r>breakoutCanvas.width)
-  b.dx*=-1;
+ const notes=getNotes();
 
- if(b.y-b.r<0)
-  b.dy*=-1;
+ noteList.innerHTML="";
 
- if(
-  b.y+b.r>=p.y&&
-  b.y-b.r<=p.y+p.h&&
-  b.x>=p.x&&
-  b.x<=p.x+p.w
- ){
+ notes.forEach(note=>{
 
-  b.dy=-Math.abs(b.dy);
+  const item=document.createElement("div");
 
-  const hit=(b.x-(p.x+p.w/2))/(p.w/2);
+  item.className=
+   "noteItem"+
+   (note.id===currentNoteId?" active":"");
 
-  b.dx=hit*6;
- }
+  item.innerHTML=`
+   <div class="noteItemTitle">
+    ${escapeHTML(note.title||"Untitled")}
+   </div>
+   <div class="noteItemDate">
+    ${new Date(note.updated).toLocaleDateString()}
+   </div>
+  `;
 
- for(const brick of bricks){
+  item.addEventListener("click",()=>{
+   saveCurrentNote();
+   openNote(note.id);
+  });
 
-  if(!brick.alive)continue;
-
-  if(
-   b.x>brick.x&&
-   b.x<brick.x+brick.w&&
-   b.y>brick.y&&
-   b.y<brick.y+brick.h
-  ){
-
-   brick.alive=false;
-   b.dy*=-1;
-
-   setScore(
-    parseInt(scoreDisplay.textContent.split(": ")[1]||0)+10
-   );
-
-   break;
-  }
- }
-
- if(b.y>breakoutCanvas.height){
-
-  gameOver(
-   "GAME OVER",
-   "The ball escaped."
-  );
-
-  return;
- }
-
- if(bricks.every(x=>!x.alive)){
-
-  gameOver(
-   "YOU WIN!",
-   "Every brick destroyed."
-  );
-
-  return;
- }
-
- /* Ball */
-
- bc.beginPath();
- bc.arc(b.x,b.y,b.r,0,Math.PI*2);
- bc.fillStyle="#00ffff";
- bc.fill();
-
- /* Paddle */
-
- bc.fillStyle="#fff";
- bc.fillRect(p.x,p.y,p.w,p.h);
-
- /* Bricks */
-
- bricks.forEach((brick,i)=>{
-
-  if(!brick.alive)return;
-
-  bc.fillStyle=i%2?
-   "#148c91":
-   "#00ffff";
-
-  bc.fillRect(
-   brick.x,
-   brick.y,
-   brick.w,
-   brick.h
-  );
+  noteList.appendChild(item);
 
  });
 
- animation=requestAnimationFrame(breakoutLoop);
+}
+
+function escapeHTML(value){
+
+ return String(value)
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+
 }
 
 
-/* =========================
-   INITIALIZE
-========================= */
+/* =========================================
+   BUTTONS
+========================================= */
 
-setScore(0);
+document.getElementById("newNote")
+ .addEventListener("click",()=>{
+  saveCurrentNote();
+  createNote();
+ });
+
+document.getElementById("saveBtn")
+ .addEventListener("click",saveCurrentNote);
+
+document.getElementById("deleteBtn")
+ .addEventListener("click",()=>{
+
+  if(confirm("Delete this note permanently?")){
+   deleteCurrentNote();
+  }
+
+ });
+
+document.getElementById("lockBtn")
+ .addEventListener("click",lockVault);
+
+document.getElementById("returnBtn")
+ .addEventListener("click",()=>{
+
+  lockScreen.classList.remove("show");
+
+  auth.classList.remove("hidden");
+
+  authTitle.textContent="IDENTITY VERIFICATION";
+
+  actionBtn.textContent="VERIFY FACE";
+
+  actionBtn.classList.remove("hidden");
+
+  authMessage.className="message";
+  authMessage.textContent=
+   "Camera access is required to continue.";
+
+ });
+
+
+/* =========================================
+   AUTO-SAVE
+========================================= */
+
+let autoSaveTimer=null;
+
+function scheduleAutoSave(){
+
+ clearTimeout(autoSaveTimer);
+
+ autoSaveTimer=setTimeout(()=>{
+  saveCurrentNote();
+ },800);
+
+}
+
+noteTitle.addEventListener("input",scheduleAutoSave);
+noteBody.addEventListener("input",scheduleAutoSave);
+
+
+/* =========================================
+   START
+========================================= */
+
+bootSystem();
 
 </script>
 
