@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inverted Mouse</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      cursor: none !important;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: #08080c;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .content {
+      text-align: center;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    h1 {
+      font-size: clamp(40px, 8vw, 90px);
+      margin: 0;
+      letter-spacing: 8px;
+    }
+
+    p {
+      color: #999;
+      font-size: 16px;
+      letter-spacing: 2px;
+    }
+
+    .cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      border: 2px solid white;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translate(-50%, -50%);
+      transition:
+        width 0.15s ease,
+        height 0.15s ease,
+        border-color 0.15s ease;
+      mix-blend-mode: difference;
+    }
+
+    .cursor::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: white;
+      border-radius: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor.active {
+      width: 42px;
+      height: 42px;
+      border-color: #00ffff;
+    }
+
+    .status {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border: 1px solid #333;
+      border-radius: 999px;
+      background: rgba(20, 20, 25, 0.8);
+      color: #aaa;
+      font-size: 12px;
+      letter-spacing: 2px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="content">
+    <h1>INVERTED</h1>
+    <p>MOVE YOUR MOUSE</p>
+  </div>
+
+  <div class="cursor" id="cursor"></div>
+
+  <div class="status">
+    MOUSE INVERSION: ON
+  </div>
+
+  <script>
+    const cursor = document.getElementById("cursor");
+
+    let realX = window.innerWidth / 2;
+    let realY = window.innerHeight / 2;
+
+    let invertedX = realX;
+    let invertedY = realY;
+
+    let firstMove = true;
+
+    document.addEventListener("mousemove", (event) => {
+
+      if (firstMove) {
+        realX = event.clientX;
+        realY = event.clientY;
+
+        invertedX = realX;
+        invertedY = realY;
+
+        firstMove = false;
+      }
+
+      // Calculate how far the real mouse moved
+      const dx = event.clientX - realX;
+      const dy = event.clientY - realY;
+
+      // Store the real position
+      realX = event.clientX;
+      realY = event.clientY;
+
+      // INVERT THE MOVEMENT
+      invertedX -= dx;
+      invertedY -= dy;
+
+      // Keep the fake cursor inside the screen
+      invertedX = Math.max(0, Math.min(window.innerWidth, invertedX));
+      invertedY = Math.max(0, Math.min(window.innerHeight, invertedY));
+
+      cursor.style.left = invertedX + "px";
+      cursor.style.top = invertedY + "px";
+    });
+
+    document.addEventListener("mousedown", () => {
+      cursor.classList.add("active");
+    });
+
+    document.addEventListener("mouseup", () => {
+      cursor.classList.remove("active");
+    });
+
+    window.addEventListener("resize", () => {
+      invertedX = Math.min(invertedX, window.innerWidth);
+      invertedY = Math.min(invertedY, window.innerHeight);
+    });
+  </script>
+
+</body>
+</html>
