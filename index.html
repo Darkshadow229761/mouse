@@ -1,173 +1,941 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inverted Mouse</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>INVERTED ARCADE</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      cursor: none !important;
-    }
+<style>
+*{box-sizing:border-box;cursor:none!important}
+html,body{
+ margin:0;width:100%;min-height:100%;
+ background:#07070b;color:#fff;
+ font-family:Arial,sans-serif;
+}
+body{overflow:hidden}
 
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-      overflow: hidden;
-      background: #08080c;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+#app{
+ width:100%;
+ min-height:100vh;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+}
 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+header{
+ width:100%;
+ padding:22px 30px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ border-bottom:1px solid #222;
+ background:#0a0a10;
+}
 
-    .content {
-      text-align: center;
-      user-select: none;
-      pointer-events: none;
-    }
+.logo{
+ font-size:22px;
+ font-weight:900;
+ letter-spacing:4px;
+}
 
-    h1 {
-      font-size: clamp(40px, 8vw, 90px);
-      margin: 0;
-      letter-spacing: 8px;
-    }
+.logo span{color:#00ffff}
 
-    p {
-      color: #999;
-      font-size: 16px;
-      letter-spacing: 2px;
-    }
+#score{
+ color:#aaa;
+ font-size:14px;
+}
 
-    .cursor {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 24px;
-      height: 24px;
-      border: 2px solid white;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 999999;
-      transform: translate(-50%, -50%);
-      transition:
-        width 0.15s ease,
-        height 0.15s ease,
-        border-color 0.15s ease;
-      mix-blend-mode: difference;
-    }
+nav{
+ display:flex;
+ gap:10px;
+ flex-wrap:wrap;
+ justify-content:center;
+ padding:20px;
+}
 
-    .cursor::after {
-      content: "";
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: white;
-      border-radius: 50%;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
+button{
+ border:1px solid #333;
+ background:#101018;
+ color:white;
+ padding:11px 17px;
+ border-radius:8px;
+ font-weight:bold;
+ transition:.2s;
+}
 
-    .cursor.active {
-      width: 42px;
-      height: 42px;
-      border-color: #00ffff;
-    }
+button:hover{
+ background:#181824;
+ border-color:#00ffff;
+ color:#00ffff;
+}
 
-    .status {
-      position: fixed;
-      bottom: 25px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 18px;
-      border: 1px solid #333;
-      border-radius: 999px;
-      background: rgba(20, 20, 25, 0.8);
-      color: #aaa;
-      font-size: 12px;
-      letter-spacing: 2px;
-      pointer-events: none;
-    }
-  </style>
+button.active{
+ background:#00ffff;
+ color:#050509;
+ border-color:#00ffff;
+}
+
+#gameArea{
+ width:min(900px,94vw);
+ height:min(600px,68vh);
+ min-height:400px;
+ position:relative;
+ border:1px solid #292934;
+ border-radius:16px;
+ background:#0b0b12;
+ overflow:hidden;
+ box-shadow:0 0 60px rgba(0,255,255,.04);
+}
+
+.screen{
+ position:absolute;
+ inset:0;
+ display:none;
+}
+
+.screen.active{display:block}
+
+.center{
+ position:absolute;
+ inset:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ gap:12px;
+}
+
+.title{
+ font-size:clamp(30px,6vw,65px);
+ font-weight:900;
+ letter-spacing:8px;
+}
+
+.subtitle{
+ color:#888;
+ letter-spacing:2px;
+}
+
+#aimTarget{
+ position:absolute;
+ width:45px;
+ height:45px;
+ border:3px solid #00ffff;
+ border-radius:50%;
+ box-shadow:0 0 20px #00ffff;
+ display:none;
+}
+
+#aimTarget::after{
+ content:"";
+ position:absolute;
+ width:7px;
+ height:7px;
+ background:#fff;
+ border-radius:50%;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+}
+
+#aimInfo{
+ position:absolute;
+ top:15px;
+ left:15px;
+ color:#aaa;
+}
+
+#dodgeCanvas,#snakeCanvas,#breakoutCanvas{
+ width:100%;
+ height:100%;
+ display:block;
+}
+
+.help{
+ position:absolute;
+ bottom:15px;
+ left:50%;
+ transform:translateX(-50%);
+ color:#666;
+ font-size:12px;
+ text-align:center;
+ white-space:nowrap;
+}
+
+#cursor{
+ position:fixed;
+ width:24px;
+ height:24px;
+ border:2px solid white;
+ border-radius:50%;
+ transform:translate(-50%,-50%);
+ pointer-events:none;
+ z-index:999999;
+ mix-blend-mode:difference;
+}
+
+#cursor:after{
+ content:"";
+ position:absolute;
+ width:5px;height:5px;
+ background:white;
+ border-radius:50%;
+ left:50%;top:50%;
+ transform:translate(-50%,-50%);
+}
+
+#cursor.active{
+ width:42px;
+ height:42px;
+ border-color:#00ffff;
+}
+
+#message{
+ position:fixed;
+ top:50%;
+ left:50%;
+ transform:translate(-50%,-50%);
+ background:#101018;
+ border:1px solid #00ffff;
+ padding:25px 35px;
+ border-radius:14px;
+ display:none;
+ z-index:10000;
+ text-align:center;
+ box-shadow:0 0 40px rgba(0,255,255,.15);
+}
+
+@media(max-width:600px){
+ header{padding:16px}
+ nav{padding:12px}
+ #gameArea{
+  height:65vh;
+  min-height:350px;
+ }
+}
+</style>
 </head>
 
 <body>
 
-  <div class="content">
-    <h1>INVERTED</h1>
-    <p>MOVE YOUR MOUSE</p>
-  </div>
+<div id="app">
 
-  <div class="cursor" id="cursor"></div>
+<header>
+ <div class="logo">INVERTED<span> ARCADE</span></div>
+ <div id="score">SCORE: 0</div>
+</header>
 
-  <div class="status">
-    MOUSE INVERSION: ON
-  </div>
+<nav>
+ <button class="gameBtn active" data-game="home">HOME</button>
+ <button class="gameBtn" data-game="aim">AIM TRAINER</button>
+ <button class="gameBtn" data-game="dodge">DODGE</button>
+ <button class="gameBtn" data-game="snake">SNAKE</button>
+ <button class="gameBtn" data-game="breakout">BREAKOUT</button>
+</nav>
 
-  <script>
-    const cursor = document.getElementById("cursor");
+<div id="gameArea">
 
-    let realX = window.innerWidth / 2;
-    let realY = window.innerHeight / 2;
+<!-- HOME -->
+<div id="home" class="screen active">
+ <div class="center">
+  <div class="title">ARCADE</div>
+  <div class="subtitle">WELCOME TO THE WRONG SIDE OF THE MOUSE</div>
+  <p style="color:#666">Choose a game above.</p>
+ </div>
+</div>
 
-    let invertedX = realX;
-    let invertedY = realY;
+<!-- AIM -->
+<div id="aim" class="screen">
+ <div id="aimInfo">TARGETS: <b id="aimScore">0</b> | TIME: <b id="aimTime">30</b></div>
+ <div id="aimTarget"></div>
+ <div class="help">CLICK THE TARGET • 30 SECONDS</div>
+</div>
 
-    let firstMove = true;
+<!-- DODGE -->
+<div id="dodge" class="screen">
+ <canvas id="dodgeCanvas"></canvas>
+ <div class="help">MOVE WITH WASD / ARROW KEYS • SURVIVE</div>
+</div>
 
-    document.addEventListener("mousemove", (event) => {
+<!-- SNAKE -->
+<div id="snake" class="screen">
+ <canvas id="snakeCanvas"></canvas>
+ <div class="help">ARROW KEYS / WASD • EAT THE DOT</div>
+</div>
 
-      if (firstMove) {
-        realX = event.clientX;
-        realY = event.clientY;
+<!-- BREAKOUT -->
+<div id="breakout" class="screen">
+ <canvas id="breakoutCanvas"></canvas>
+ <div class="help">MOVE MOUSE OR ARROWS • BREAK EVERYTHING</div>
+</div>
 
-        invertedX = realX;
-        invertedY = realY;
+</div>
+</div>
 
-        firstMove = false;
-      }
+<div id="cursor"></div>
 
-      // Calculate how far the real mouse moved
-      const dx = event.clientX - realX;
-      const dy = event.clientY - realY;
+<div id="message">
+ <h2 id="messageTitle">GAME OVER</h2>
+ <p id="messageText"></p>
+ <button id="restart">RESTART</button>
+</div>
 
-      // Store the real position
-      realX = event.clientX;
-      realY = event.clientY;
+<script>
 
-      // INVERT THE MOVEMENT
-      invertedX -= dx;
-      invertedY -= dy;
+/* =========================
+   INVERTED CURSOR
+========================= */
 
-      // Keep the fake cursor inside the screen
-      invertedX = Math.max(0, Math.min(window.innerWidth, invertedX));
-      invertedY = Math.max(0, Math.min(window.innerHeight, invertedY));
+const cursor=document.getElementById("cursor");
 
-      cursor.style.left = invertedX + "px";
-      cursor.style.top = invertedY + "px";
-    });
+let realX=innerWidth/2;
+let realY=innerHeight/2;
+let fakeX=realX;
+let fakeY=realY;
+let firstMove=true;
 
-    document.addEventListener("mousedown", () => {
-      cursor.classList.add("active");
-    });
+document.addEventListener("mousemove",e=>{
 
-    document.addEventListener("mouseup", () => {
-      cursor.classList.remove("active");
-    });
+ if(firstMove){
+  realX=e.clientX;
+  realY=e.clientY;
+  fakeX=realX;
+  fakeY=realY;
+  firstMove=false;
+ }
 
-    window.addEventListener("resize", () => {
-      invertedX = Math.min(invertedX, window.innerWidth);
-      invertedY = Math.min(invertedY, window.innerHeight);
-    });
-  </script>
+ const dx=e.clientX-realX;
+ const dy=e.clientY-realY;
+
+ realX=e.clientX;
+ realY=e.clientY;
+
+ fakeX-=dx;
+ fakeY-=dy;
+
+ fakeX=Math.max(0,Math.min(innerWidth,fakeX));
+ fakeY=Math.max(0,Math.min(innerHeight,fakeY));
+
+ cursor.style.left=fakeX+"px";
+ cursor.style.top=fakeY+"px";
+
+ if(currentGame==="breakout") breakoutMouse=e.clientX;
+});
+
+document.addEventListener("mousedown",()=>{
+ cursor.classList.add("active");
+});
+
+document.addEventListener("mouseup",()=>{
+ cursor.classList.remove("active");
+});
+
+
+/* =========================
+   GAME SYSTEM
+========================= */
+
+let currentGame="home";
+let animation=null;
+
+const scoreDisplay=document.getElementById("score");
+
+function setScore(n){
+ scoreDisplay.textContent="SCORE: "+n;
+}
+
+function stopGame(){
+ if(animation){
+  cancelAnimationFrame(animation);
+  animation=null;
+ }
+
+ clearInterval(aimTimer);
+ clearInterval(snakeTimer);
+
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+}
+
+document.querySelectorAll(".gameBtn").forEach(btn=>{
+
+ btn.addEventListener("click",()=>{
+
+  stopGame();
+
+  document.querySelectorAll(".gameBtn")
+   .forEach(b=>b.classList.remove("active"));
+
+  btn.classList.add("active");
+
+  currentGame=btn.dataset.game;
+
+  document.getElementById(currentGame).classList.add("active");
+
+  setScore(0);
+
+  if(currentGame==="aim") startAim();
+  if(currentGame==="dodge") startDodge();
+  if(currentGame==="snake") startSnake();
+  if(currentGame==="breakout") startBreakout();
+
+ });
+
+});
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+const message=document.getElementById("message");
+const messageTitle=document.getElementById("messageTitle");
+const messageText=document.getElementById("messageText");
+
+function gameOver(title,text){
+
+ messageTitle.textContent=title;
+ messageText.textContent=text;
+ message.style.display="block";
+}
+
+document.getElementById("restart").onclick=()=>{
+
+ message.style.display="none";
+
+ document.querySelector(`[data-game="${currentGame}"]`).click();
+
+};
+
+
+/* =========================
+   AIM TRAINER
+========================= */
+
+const target=document.getElementById("aimTarget");
+const aimScoreEl=document.getElementById("aimScore");
+const aimTimeEl=document.getElementById("aimTime");
+
+let aimScore=0;
+let aimTime=30;
+let aimTimer=null;
+
+function moveTarget(){
+
+ const area=document.getElementById("aim");
+
+ const x=Math.random()*(area.clientWidth-60)+30;
+ const y=Math.random()*(area.clientHeight-80)+40;
+
+ target.style.left=x+"px";
+ target.style.top=y+"px";
+ target.style.display="block";
+}
+
+function startAim(){
+
+ aimScore=0;
+ aimTime=30;
+
+ aimScoreEl.textContent=0;
+ aimTimeEl.textContent=30;
+
+ moveTarget();
+
+ clearInterval(aimTimer);
+
+ aimTimer=setInterval(()=>{
+
+  aimTime--;
+
+  aimTimeEl.textContent=aimTime;
+
+  if(aimTime<=0){
+
+   clearInterval(aimTimer);
+   target.style.display="none";
+
+   setScore(aimScore);
+
+   gameOver(
+    "TIME!",
+    "You hit "+aimScore+" targets."
+   );
+  }
+
+ },1000);
+}
+
+target.addEventListener("click",e=>{
+
+ if(currentGame!=="aim")return;
+
+ e.stopPropagation();
+
+ aimScore++;
+
+ aimScoreEl.textContent=aimScore;
+ setScore(aimScore);
+
+ moveTarget();
+
+});
+
+
+/* =========================
+   DODGE
+========================= */
+
+const dodgeCanvas=document.getElementById("dodgeCanvas");
+const dc=dodgeCanvas.getContext("2d");
+
+let dodgePlayer;
+let enemies=[];
+let keys={};
+let dodgeStart;
+let dodgeScore;
+
+function resizeCanvas(canvas,ctx){
+
+ const rect=canvas.parentElement.getBoundingClientRect();
+
+ canvas.width=rect.width;
+ canvas.height=rect.height;
+}
+
+document.addEventListener("keydown",e=>{
+ keys[e.key.toLowerCase()]=true;
+});
+
+document.addEventListener("keyup",e=>{
+ keys[e.key.toLowerCase()]=false;
+});
+
+function startDodge(){
+
+ resizeCanvas(dodgeCanvas,dc);
+
+ dodgePlayer={
+  x:dodgeCanvas.width/2,
+  y:dodgeCanvas.height/2,
+  size:18,
+  speed:5
+ };
+
+ enemies=[];
+ dodgeScore=0;
+ dodgeStart=Date.now();
+
+ for(let i=0;i<8;i++) spawnEnemy();
+
+ dodgeLoop();
+}
+
+function spawnEnemy(){
+
+ enemies.push({
+  x:Math.random()*dodgeCanvas.width,
+  y:-30,
+  size:12+Math.random()*12,
+  speed:2+Math.random()*3
+ });
+
+}
+
+function dodgeLoop(){
+
+ dc.clearRect(0,0,dodgeCanvas.width,dodgeCanvas.height);
+
+ let p=dodgePlayer;
+
+ if(keys["w"]||keys["arrowup"])p.y-=p.speed;
+ if(keys["s"]||keys["arrowdown"])p.y+=p.speed;
+ if(keys["a"]||keys["arrowleft"])p.x-=p.speed;
+ if(keys["d"]||keys["arrowright"])p.x+=p.speed;
+
+ p.x=Math.max(p.size,Math.min(dodgeCanvas.width-p.size,p.x));
+ p.y=Math.max(p.size,Math.min(dodgeCanvas.height-p.size,p.y));
+
+ dc.beginPath();
+ dc.arc(p.x,p.y,p.size,0,Math.PI*2);
+ dc.strokeStyle="#00ffff";
+ dc.lineWidth=3;
+ dc.stroke();
+
+ for(let i=enemies.length-1;i>=0;i--){
+
+  let e=enemies[i];
+
+  e.y+=e.speed;
+
+  dc.beginPath();
+  dc.arc(e.x,e.y,e.size,0,Math.PI*2);
+  dc.fillStyle="#ff3b6b";
+  dc.fill();
+
+  const dx=e.x-p.x;
+  const dy=e.y-p.y;
+
+  if(Math.hypot(dx,dy)<e.size+p.size){
+
+   gameOver(
+    "YOU GOT HIT",
+    "Survival: "+dodgeScore+" points"
+   );
+
+   return;
+  }
+
+  if(e.y>dodgeCanvas.height+50){
+
+   enemies.splice(i,1);
+   spawnEnemy();
+   dodgeScore++;
+   setScore(dodgeScore);
+  }
+ }
+
+ if(Date.now()-dodgeStart>30000){
+
+  gameOver("30 SECONDS!", "You survived.");
+  return;
+ }
+
+ animation=requestAnimationFrame(dodgeLoop);
+}
+
+
+/* =========================
+   SNAKE
+========================= */
+
+const snakeCanvas=document.getElementById("snakeCanvas");
+const sc=snakeCanvas.getContext("2d");
+
+let snake=[];
+let food={};
+let snakeDir={x:1,y:0};
+let snakeTimer=null;
+let snakeScore=0;
+
+function startSnake(){
+
+ resizeCanvas(snakeCanvas,sc);
+
+ const size=20;
+
+ snake=[
+  {x:8,y:8},
+  {x:7,y:8},
+  {x:6,y:8}
+ ];
+
+ snakeDir={x:1,y:0};
+ snakeScore=0;
+
+ spawnFood();
+
+ clearInterval(snakeTimer);
+ snakeTimer=setInterval(snakeStep,110);
+
+ drawSnake();
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(currentGame!=="snake")return;
+
+ const k=e.key.toLowerCase();
+
+ if((k==="arrowup"||k==="w")&&snakeDir.y!==1)
+  snakeDir={x:0,y:-1};
+
+ if((k==="arrowdown"||k==="s")&&snakeDir.y!==-1)
+  snakeDir={x:0,y:1};
+
+ if((k==="arrowleft"||k==="a")&&snakeDir.x!==1)
+  snakeDir={x:-1,y:0};
+
+ if((k==="arrowright"||k==="d")&&snakeDir.x!==-1)
+  snakeDir={x:1,y:0};
+
+});
+
+function spawnFood(){
+
+ const cols=Math.floor(snakeCanvas.width/20);
+ const rows=Math.floor(snakeCanvas.height/20);
+
+ food={
+  x:Math.floor(Math.random()*cols),
+  y:Math.floor(Math.random()*rows)
+ };
+
+}
+
+function snakeStep(){
+
+ const cols=Math.floor(snakeCanvas.width/20);
+ const rows=Math.floor(snakeCanvas.height/20);
+
+ const head={
+  x:snake[0].x+snakeDir.x,
+  y:snake[0].y+snakeDir.y
+ };
+
+ if(
+  head.x<0||
+  head.y<0||
+  head.x>=cols||
+  head.y>=rows||
+  snake.some(s=>s.x===head.x&&s.y===head.y)
+ ){
+
+  clearInterval(snakeTimer);
+
+  gameOver("SNAKE OVER","Score: "+snakeScore);
+  return;
+ }
+
+ snake.unshift(head);
+
+ if(head.x===food.x&&head.y===food.y){
+
+  snakeScore++;
+  setScore(snakeScore);
+  spawnFood();
+
+ }else{
+
+  snake.pop();
+
+ }
+
+ drawSnake();
+}
+
+function drawSnake(){
+
+ sc.clearRect(0,0,snakeCanvas.width,snakeCanvas.height);
+
+ snake.forEach((s,i)=>{
+
+  sc.fillStyle=i===0?"#00ffff":"#148c91";
+
+  sc.fillRect(
+   s.x*20+2,
+   s.y*20+2,
+   16,
+   16
+  );
+
+ });
+
+ sc.fillStyle="#fff";
+
+ sc.fillRect(
+  food.x*20+5,
+  food.y*20+5,
+  10,
+  10
+ );
+
+}
+
+
+/* =========================
+   BREAKOUT
+========================= */
+
+const breakoutCanvas=document.getElementById("breakoutCanvas");
+const bc=breakoutCanvas.getContext("2d");
+
+let breakoutBall;
+let breakoutPaddle;
+let bricks=[];
+let breakoutMouse=0;
+
+function startBreakout(){
+
+ resizeCanvas(breakoutCanvas,bc);
+
+ breakoutPaddle={
+  x:breakoutCanvas.width/2-55,
+  y:breakoutCanvas.height-35,
+  w:110,
+  h:12
+ };
+
+ breakoutBall={
+  x:breakoutCanvas.width/2,
+  y:breakoutCanvas.height/2,
+  dx:4,
+  dy:-4,
+  r:8
+ };
+
+ bricks=[];
+
+ const cols=8;
+ const rows=5;
+ const gap=8;
+
+ const bw=(breakoutCanvas.width-70-gap*(cols-1))/cols;
+
+ for(let r=0;r<rows;r++){
+
+  for(let c=0;c<cols;c++){
+
+   bricks.push({
+    x:35+c*(bw+gap),
+    y:35+r*30,
+    w:bw,
+    h:20,
+    alive:true
+   });
+
+  }
+ }
+
+ breakoutLoop();
+}
+
+document.addEventListener("keydown",e=>{
+
+ if(currentGame!=="breakout")return;
+
+ if(e.key==="ArrowLeft")
+  breakoutPaddle.x-=25;
+
+ if(e.key==="ArrowRight")
+  breakoutPaddle.x+=25;
+
+});
+
+function breakoutLoop(){
+
+ bc.clearRect(0,0,breakoutCanvas.width,breakoutCanvas.height);
+
+ const b=breakoutBall;
+ const p=breakoutPaddle;
+
+ if(breakoutMouse){
+  p.x=breakoutMouse-
+   breakoutCanvas.getBoundingClientRect().left-
+   p.w/2;
+ }
+
+ p.x=Math.max(0,Math.min(
+  breakoutCanvas.width-p.w,
+  p.x
+ ));
+
+ b.x+=b.dx;
+ b.y+=b.dy;
+
+ if(b.x-b.r<0||b.x+b.r>breakoutCanvas.width)
+  b.dx*=-1;
+
+ if(b.y-b.r<0)
+  b.dy*=-1;
+
+ if(
+  b.y+b.r>=p.y&&
+  b.y-b.r<=p.y+p.h&&
+  b.x>=p.x&&
+  b.x<=p.x+p.w
+ ){
+
+  b.dy=-Math.abs(b.dy);
+
+  const hit=(b.x-(p.x+p.w/2))/(p.w/2);
+
+  b.dx=hit*6;
+ }
+
+ for(const brick of bricks){
+
+  if(!brick.alive)continue;
+
+  if(
+   b.x>brick.x&&
+   b.x<brick.x+brick.w&&
+   b.y>brick.y&&
+   b.y<brick.y+brick.h
+  ){
+
+   brick.alive=false;
+   b.dy*=-1;
+
+   setScore(
+    parseInt(scoreDisplay.textContent.split(": ")[1]||0)+10
+   );
+
+   break;
+  }
+ }
+
+ if(b.y>breakoutCanvas.height){
+
+  gameOver(
+   "GAME OVER",
+   "The ball escaped."
+  );
+
+  return;
+ }
+
+ if(bricks.every(x=>!x.alive)){
+
+  gameOver(
+   "YOU WIN!",
+   "Every brick destroyed."
+  );
+
+  return;
+ }
+
+ /* Ball */
+
+ bc.beginPath();
+ bc.arc(b.x,b.y,b.r,0,Math.PI*2);
+ bc.fillStyle="#00ffff";
+ bc.fill();
+
+ /* Paddle */
+
+ bc.fillStyle="#fff";
+ bc.fillRect(p.x,p.y,p.w,p.h);
+
+ /* Bricks */
+
+ bricks.forEach((brick,i)=>{
+
+  if(!brick.alive)return;
+
+  bc.fillStyle=i%2?
+   "#148c91":
+   "#00ffff";
+
+  bc.fillRect(
+   brick.x,
+   brick.y,
+   brick.w,
+   brick.h
+  );
+
+ });
+
+ animation=requestAnimationFrame(breakoutLoop);
+}
+
+
+/* =========================
+   INITIALIZE
+========================= */
+
+setScore(0);
+
+</script>
 
 </body>
 </html>
